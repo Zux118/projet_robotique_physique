@@ -33,6 +33,11 @@ def obs_parano(node_id):
         done = True
         return
 
+    if th_parano[node_id]["button.forward"]:
+        port = thymio_serial_ports[0].device
+        print(f"[IDENTIFICATION] Perso: PARANOÏAQUE | Port: {port}")
+        time.sleep(0.5)
+
     prox = th_parano[node_id]["prox.horizontal"]
 
     if max(prox[:5]) < THRESHOLD:  # Aucun obstacle → tourner à gauche
@@ -62,6 +67,10 @@ def obs_dirige(node_id):
         th_dirige[node_id]["motor.right.target"] = 0
         done = True
         return
+    if th_dirige[node_id]["button.forward"]:
+        port = thymio_serial_ports[1].device
+        print(f"[IDENTIFICATION] Perso: DIRIGEANT | Port: {port}")
+        time.sleep(0.5)
 
     prox = th_dirige[node_id]["prox.horizontal"]
 
@@ -93,6 +102,10 @@ def obs_cyclique(node_id):
         th_cyclique[node_id]["motor.right.target"] = 0
         done = True
         return
+    if th_cyclique[node_id]["button.forward"]:
+        port = thymio_serial_ports[2].device
+        print(f"[IDENTIFICATION] Perso: CYCLIQUE | Port: {port}")
+        time.sleep(0.5)
 
     prox = th_cyclique[node_id]["prox.horizontal"]
 
@@ -133,11 +146,11 @@ if len(thymio_serial_ports) < 3:  # Vérifier qu'il y a au moins 3 dongles
 
 # Connexion des robots via les ports série
 th_parano   = Thymio(use_tcp=False, serial_port=thymio_serial_ports[0].device,
-                     refreshing_coverage={"prox.horizontal", "button.center"})
+                     refreshing_coverage={"prox.horizontal", "button.center", "button.forward"})
 th_dirige   = Thymio(use_tcp=False, serial_port=thymio_serial_ports[1].device,
-                     refreshing_coverage={"prox.horizontal", "button.center"})
+                     refreshing_coverage={"prox.horizontal", "button.center", "button.forward"})
 th_cyclique = Thymio(use_tcp=False, serial_port=thymio_serial_ports[2].device,
-                     refreshing_coverage={"prox.horizontal", "button.center"})
+                     refreshing_coverage={"prox.horizontal", "button.center", "button.forward"})
 
 # Gestion des erreurs de communication
 th_parano.on_comm_error   = on_comm_error
