@@ -1,6 +1,3 @@
-C'est un excellent point de départ pour documenter ton projet. Voici une structure de **README.md** complète et professionnelle, adaptée à ton code final. Elle explique la technique de gestion multi-robot ainsi que les logiques comportementales.
-
----
 
 # Thymio Multi-Personality Project
 
@@ -36,21 +33,6 @@ Chaque robot possède une logique de décision unique basée sur les relevés de
     3. Pivote à droite pendant 1s.
     4. Recule pendant 1s.
 
----
-
-## Installation et Utilisation
-
-### Prérequis
-*   Python 3.x
-*   Bibliothèque `thymiodirect` (`pip install thymiodirect`)
-*   3 dongles USB Thymio branchés sur la même machine.
-
-### Lancement
-1. Allumez les trois robots.
-2. Exécutez le script : `python nom_du_fichier.py`.
-3. Pour arrêter l'ensemble du système, appuyez sur le **bouton central** de n'importe quel robot.
-
----
 
 ## Exercices réalisés dans ce projet
 
