@@ -4,13 +4,8 @@ import os, time
 
 global done
 
-# ── Identifiants des robots ───────────────────────────────────────────────────
-parano_ID   = 0  # Robot paranoïaque
-dirige_ID   = 1  # Robot dirigeant
-cyclique_ID = 2  # Robot cyclique
-
 # ── Constantes ────────────────────────────────────────────────────────────────
-THRESHOLD  = 2000  # Seuil pour détecter un obstacle
+THRESHOLD  =500  # Seuil pour détecter un obstacle
 TURN_SPEED = 200   # Vitesse de rotation
 SPEED      = 300   # Vitesse de déplacement
 
