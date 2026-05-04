@@ -4,25 +4,30 @@ import os, time
 
 global done
 
-# ── Identifiants des robots (à ajuster selon vos node_ids) ───────────────────
-parano_ID   = 0
-dirige_ID = 1
-cyclique_ID = 2
-THRESHOLD = 2000
-TURN_SPEED   = 200
-SPEED = 300
+# ── Identifiants des robots ───────────────────────────────────────────────────
+parano_ID   = 0  # Robot paranoïaque
+dirige_ID   = 1  # Robot dirigeant
+cyclique_ID = 2  # Robot cyclique
 
-# Fonction de gestion d'erreur de communication
+# ── Constantes ────────────────────────────────────────────────────────────────
+THRESHOLD  = 2000  # Seuil pour détecter un obstacle
+TURN_SPEED = 200   # Vitesse de rotation
+SPEED      = 300   # Vitesse de déplacement
+
+done = False  # Variable pour arrêter les robots
+
+# ── Gestionnaire d'erreur de communication ────────────────────────────────────
 def on_comm_error(error):
+    """Gère les erreurs de communication"""
     print(error)
-    os._exit(1)  # Sortie forcée en cas d'erreur de communication
+    os._exit(1)
 
-
+# ── Observateur pour le robot paranoïaque ─────────────────────────────────────
 def obs_parano(node_id):
-
+    """Comportement du robot paranoïaque"""
     global done
 
-    if th_parano[node_id]["button.center"]:
+    if th_parano[node_id]["button.center"]:  # Si le bouton central est appuyé
         th_parano[node_id]["motor.left.target"] = 0
         th_parano[node_id]["motor.right.target"] = 0
         done = True
@@ -33,11 +38,10 @@ def obs_parano(node_id):
     if max(prox[:5]) < THRESHOLD:  # Aucun obstacle → tourner à gauche
         th_parano[node_id]["motor.left.target"] = -TURN_SPEED
         th_parano[node_id]["motor.right.target"] = TURN_SPEED
-
-
-    elif max(prox[:5]) > THRESHOLD:
+    elif max(prox[:5]) > THRESHOLD:  # Obstacle détecté
         gauche = prox[0] + prox[1]
         droite = prox[3] + prox[4]
+        # Tourner en fonction de la proximité des obstacles
         if gauche > droite:
             th_parano[node_id]["motor.left.target"] = -TURN_SPEED
             th_parano[node_id]["motor.right.target"] = TURN_SPEED
@@ -48,11 +52,12 @@ def obs_parano(node_id):
         th_parano[node_id]["motor.left.target"] = SPEED
         th_parano[node_id]["motor.right.target"] = SPEED
 
+# ── Observateur pour le robot dirigeant ───────────────────────────────────────
 def obs_dirige(node_id):
-
+    """Comportement du robot dirigeant"""
     global done
 
-    if th_dirige[node_id]["button.center"]:
+    if th_dirige[node_id]["button.center"]:  # Si le bouton central est appuyé
         th_dirige[node_id]["motor.left.target"] = 0
         th_dirige[node_id]["motor.right.target"] = 0
         done = True
@@ -60,15 +65,15 @@ def obs_dirige(node_id):
 
     prox = th_dirige[node_id]["prox.horizontal"]
 
-    if max(prox[:5]) > THRESHOLD:
+    if max(prox[:5]) > THRESHOLD:  # Obstacle détecté
         gauche = prox[0] + prox[1]
         droite = prox[3] + prox[4]
+        # Tourner en fonction de la proximité des obstacles
         if gauche > droite:
             th_dirige[node_id]["motor.left.target"] = -TURN_SPEED
             th_dirige[node_id]["motor.right.target"] = TURN_SPEED
             th_dirige[node_id]["motor.left.target"] = 150
             th_dirige[node_id]["motor.right.target"] = 150
-
         else:
             th_dirige[node_id]["motor.left.target"] = TURN_SPEED
             th_dirige[node_id]["motor.right.target"] = -TURN_SPEED
@@ -78,35 +83,92 @@ def obs_dirige(node_id):
         th_dirige[node_id]["motor.left.target"] = 0
         th_dirige[node_id]["motor.right.target"] = 0
 
+# ── Observateur pour le robot cyclique ───────────────────────────────────────
+def obs_cyclique(node_id):
+    """Comportement du robot cyclique"""
+    global done
 
-thymio_serial_ports = ThymioSerialPort.get_ports()
-serial_port = thymio_serial_ports[0].device
-serial_port_2 = thymio_serial_ports[1].device
+    if th_cyclique[node_id]["button.center"]:  # Si le bouton central est appuyé
+        th_cyclique[node_id]["motor.left.target"]  = 0
+        th_cyclique[node_id]["motor.right.target"] = 0
+        done = True
+        return
+
+    prox = th_cyclique[node_id]["prox.horizontal"]
+
+    if max(prox[:5]) > THRESHOLD:  # Obstacle détecté
+        # Étape 1 : Avancer
+        th_cyclique[node_id]["motor.left.target"]  = SPEED
+        th_cyclique[node_id]["motor.right.target"] = SPEED
+        time.sleep(1)
+
+        # Étape 2 : Tourner à gauche
+        th_cyclique[node_id]["motor.left.target"]  = -TURN_SPEED
+        th_cyclique[node_id]["motor.right.target"] = TURN_SPEED
+        time.sleep(1)
+
+        # Étape 3 : Tourner à droite
+        th_cyclique[node_id]["motor.left.target"]  = TURN_SPEED
+        th_cyclique[node_id]["motor.right.target"] = -TURN_SPEED
+        time.sleep(1)
+
+        # Étape 4 : Reculer
+        th_cyclique[node_id]["motor.left.target"]  = -SPEED
+        th_cyclique[node_id]["motor.right.target"] = -SPEED
+        time.sleep(1)
+
+        # Fin du cycle → arrêt
+        th_cyclique[node_id]["motor.left.target"]  = 0
+        th_cyclique[node_id]["motor.right.target"] = 0
+    else:
+        th_cyclique[node_id]["motor.left.target"]  = 0
+        th_cyclique[node_id]["motor.right.target"] = 0
 
 
-th_parano = Thymio(use_tcp=False, serial_port=serial_port,
-                   refreshing_coverage={"prox.horizontal", "button.center"})
-th_dirige = Thymio(use_tcp=False, serial_port=serial_port_2,
-                   refreshing_coverage={"prox.horizontal", "button.center"})
-th_parano.on_comm_error = on_comm_error
-th_dirige.on_comm_error = on_comm_error
+# ── Connexion — un dongle par robot ───────────────────────────────────────────
+thymio_serial_ports = ThymioSerialPort.get_ports()  # Récupérer les ports série
+if len(thymio_serial_ports) < 3:  # Vérifier qu'il y a au moins 3 dongles
+    print(f"[ERREUR] 3 dongles attendus, {len(thymio_serial_ports)} détecté(s).")
+    os._exit(1)
+
+# Connexion des robots via les ports série
+th_parano   = Thymio(use_tcp=False, serial_port=thymio_serial_ports[0].device,
+                     refreshing_coverage={"prox.horizontal", "button.center"})
+th_dirige   = Thymio(use_tcp=False, serial_port=thymio_serial_ports[1].device,
+                     refreshing_coverage={"prox.horizontal", "button.center"})
+th_cyclique = Thymio(use_tcp=False, serial_port=thymio_serial_ports[2].device,
+                     refreshing_coverage={"prox.horizontal", "button.center"})
+
+# Gestion des erreurs de communication
+th_parano.on_comm_error   = on_comm_error
+th_dirige.on_comm_error   = on_comm_error
+th_cyclique.on_comm_error = on_comm_error
+
+# Connexion des robots
 th_parano.connect()
 th_dirige.connect()
+th_cyclique.connect()
 time.sleep(1)
 
-id_parano = th_parano.first_node()
-id_dirige = th_dirige.first_node()
-th_parano.set_variable_observer(id_parano, obs_parano)
-th_dirige.set_variable_observer(id_dirige, obs_dirige)
+# Récupérer l'ID des nœuds des robots
+id_parano   = th_parano.first_node()
+id_dirige   = th_dirige.first_node()
+id_cyclique = th_cyclique.first_node()
 
-print("[INFO] Paranoïaque démarré — bouton central pour arrêter.")
+# Définir les observateurs de variables pour chaque robot
+th_parano.set_variable_observer(id_parano,     obs_parano)
+th_dirige.set_variable_observer(id_dirige,     obs_dirige)
+th_cyclique.set_variable_observer(id_cyclique, obs_cyclique)
 
+print("[INFO] 3 robots démarrés — bouton central pour arrêter.")
+
+# Boucle d'attente jusqu'à ce que l'utilisateur appuie sur le bouton central
 while not done:
     time.sleep(0.1)
 
+# Déconnexion des robots
 th_parano.disconnect()
 th_dirige.disconnect()
+th_cyclique.disconnect()
+
 print("[INFO] Déconnecté.")
-
-
-
