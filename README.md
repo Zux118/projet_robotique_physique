@@ -36,12 +36,6 @@ Chaque robot possède une logique de décision unique basée sur les relevés de
 
 ## Exercices réalisés dans ce projet
 
-Pour compléter ton projet Git, voici une section supplémentaire à ajouter à ton **README.md**. Elle détaille les exercices fondamentaux que tu as réalisés : la **mesure de distance physique**, la **gestion des priorités** et le **pilotage des LEDs via l'assembleur**.
-
----
-
-## Exercices de Base & Apprentissages
-
 Avant de passer au système multi-robot, plusieurs concepts clés ont été maîtrisés à travers des exercices spécifiques :
 
 ### 1. Conversion des Capteurs en Distance Réelle
@@ -60,7 +54,14 @@ Pour changer la couleur des LEDs du dessus (RGB), nous avons utilisé une métho
 *   Cela permet de créer des signaux visuels personnalisés (ex: Rouge pour le Paranoïaque, Vert pour le Dirigé).
 *   **Fonction dédiée :** `set_leds(th, id, R, G, B)` où les valeurs vont de 0 à 32.
 
+### 10. Communication entre un deux robots
 ---
+Cet exercice simule un comportement de "jeu" ou de "suivi" entre deux robots. L'objectif est de créer une dépendance : le comportement du premier robot (Leader) dépend de l'état interne du second (Suiveur).
 
+*   Le Suiveur : Explore son environnement et met à jour sa proximité (follower_prox) en temps réel.
+
+*   Le Leader : Explore de manière aléatoire, mais s'arrête net pendant 2 secondes s'il détecte que le Suiveur est proche (ou coincé).
+
+*   Technique : Utilisation de timestamps (time.time()) pour gérer les durées sans bloquer la communication, permettant une réactivité maximale aux capteurs.
 ### Note technique
 *Le script attend exactement 3 robots. Si vous souhaitez en utiliser moins ou plus, modifiez la vérification de longueur de `thymio_serial_ports` au début du fichier.*
